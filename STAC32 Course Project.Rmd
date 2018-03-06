@@ -1,0 +1,540 @@
+---
+title: "STAC32 Course Project"
+author: "Aydin Baradaran-Seyed"
+date: "November 29, 2017"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+
+The hypothesis/question at hand of the study present is to see which team statistic given in a 16 game season effects the outcome of the game. Essentially, what varaibles high or low distinguish themselves to help a team win more games (winning record of winning eight or more games) and lose others (losing record with winning less than eight games). Twenty-eight teams played through the season and each of their team statistics in rushing and passing yards, opponents rushing and passing yards, turnovers, field goal percentage, turnover differential, punitng yards per punt, and percentage of rushing the ball were recorded. Different values in difference of rushing, passing and total yards were created as well as if the team had a winning record. Difference of total, passing and rushing yards, rushing and passing yards, and opponents rushing and passing yards were determining factors towards whether a team had winning record. The direct relation to high rushing/passing yards resulting in lower opponent rushing/passing yards contributed to the anaylsis of difference of passing and rushing yards and as collective bunch the total difference of yards. Indicating that the higher the total yardage a team has over the opponents determines the number of wins they have. All this was shown using a regression fit to view a relationship between wins and the varaibles as well as a t-test or mood test where appropriate to further say if it was signifcant to a teams record or not. Other variables in percentage of rushing the ball, turnovers, field goal percentage, and penalty yards didn't have a noticeable impact but did show teams with a winning record displayed higher values in these when comparing mean/median (where appropriate) and the boxplots. Lastly the only varaible that displayed no form of determing factor and difference in mean/median between winning and losing record teams is the average punting yards per punt which exhibited no relationship with a regression fit alongside with no noticeable difference between the statistic between the two records. From the results, yardage in high team yardage and low opponent yardage is the only factor that determines the number of wins a team wins where other variables have a commonality in being higher in winning record teams but don't determine the outcome of the game and lastly, specifcally the punting statistic, is the same in both records and has no factor in the outcome of the game.
+
+## Introduction
+
+The game of Football is an American pastime viewed by many. The goal of the sport is to win as many possible games as possible in a 16-game regular season. The top four teams of each conference (American and National football conferences) qualify for the playoffs where they square off to play in the Super Bowl and essentially win the Lombardi Trophy. The data set given is of 28 teams and their teams statistics for their season. A team is said to have a winning record if they've won eight or more games. The question at hand is which team statistics plays a key role in how a team has a winning record or not. Many analysts for the NFL conduct statistical tests, where they try to determine what a true winning formula is for a NFL team to be successful in winning night in and out. What this report does is no different other than the amount of statistics given on the teams.
+
+
+## Materials and Methods
+
+32 teams play a 16-game regular season and they win x amount games out the 16. Each of the teams rushing and passing yards and their opponents rushing and passing yards were recorded, as well as their percentage of running the ball, field goal percentage, penalty yards, turnover differential, and punting average per punt. Each teams wins were labeled along side of each the columns in the data set. The data was given by Ken Butler the instructor of STAC32: Applications of Statistical Methods for the course project worth 10% of our final grade (evaluating our data analysis of a list of different data sets). Using R (R-markdown report), the data was assigned into two groups one with a winning record and the other with a losing record. Here the comparison on how winning teams win were then compared with each of the columns in the data set to see which specific stat of the team plays a key role in how teams wins.
+
+
+### Setup 
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+library(devtools)
+install_github("nxskok/smmr")
+library(smmr)
+```
+
+Necessary libraries are downloaded for built in functions that will be needed in the analysis.
+
+### Data/Methods
+```{r}
+url = "http://www.utsc.utoronto.ca/~butler/c32/football.txt"
+global = read_delim(url, " ")
+global
+global2 = global %>% mutate(total_yards=rushing+passing,
+          opp_tot_yards = opp.rushing+opp.passing,
+          diff_yards = total_yards - opp_tot_yards,winner = (wins>=8),pass_diff = passing - opp.passing,rush_diff= rushing - opp.rushing)
+global2
+```
+Here we have read our data in our global variable from the URL provided from the course project handout located on the STAC32 website taught by Professor Butler. The global2 variable is the same as global expect for the new columns in difference of yards (diff_yards),which is the teams total yards (passing and rushing) subtracted by their oppents total yards in the season (opp.passing,and opp.rushing). Also passing yards difference (pass_diff) and rushing yards difference (rush_diff) is the teams passing yards subtracted by their opponents passing yards and their rushing yards subtracted by their opponents rushing yards respectively. As well, we have created if the team is a winner column, True indicating they are indeed a team who won greater than or equal to eight games boasting a winning record and False for being less than eight wins in their season (boasting a losing record).
+
+##Analysis and Results
+
+For the whole analysis we will be comparing each column with wins and winner as the whole question of the analysis is to see which statistics of the football teams high or low effect the outcome on how many games they win in a season. At the end of analysis of each specific statistic, a discussion in terms of Football context is described as such for the conclusion at the end of the report.
+
+We will first look at the variables who have a significant role in the number of wins a team wins: difference of yards, passing and rushing yards, opponents and rushing and passing yards and difference of passing and rushing yards.
+
+Afterwards the variables that don't effect the outcome in a team winning games but has a noticeable difference (higher for teams with winning records) will be analyised: field goal percentage, penalties, turnovers and percentage of running the ball.
+
+Lastly the lone variable that has no form of effecting (no difference between a winning and losing record) the game will be looked at in punting.
+
+*Any notation of H_o and H_a is specific per analysis done, so any duplications in other analysis should be not considered (H_a/o specific only to the analysis case).
+
+### Wins/Winner with respect to Difference of Yards
+```{r}
+dyards_scatt = ggplot(global2,aes(x=wins,y=diff_yards))+geom_point()+geom_smooth(se=F)
+dyards_scatt
+fitted_line_dyards = lm(diff_yards~wins,data = global2)
+summary(fitted_line_dyards)
+dyards_res = ggplot(fitted_line_dyards,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+dyards_res
+```
+
+Here we're seeing if there exists a relationship between teams who do or don't out gain their opponents in yards and how many wins they have as a result. From our scatter plot there seems to exist a linear relationship between wins and the difference of yards, the higher the wins the team has, the more yards they out gain their opponents by. Our R-squared of 78% tells us that there does indeed exist a relationship between the two. The coefficent P-value of 4.87x10^-10 is also strongly significant. Further looking at our residual plot we can see that regression was appropriate  (observed - predicted) as we have a random set of points and smooth curve. To note, we could do a curve to fit the regression model which more or less gives the same value (slightly higher) but we're not looking for the details we're just looking at if we can see a relationship between the two so we can say and verify the higher the difference of yards the more wins a team will accumulate.
+
+```{r}
+t.test(diff_yards~winner,data=global2,alternative="less")
+ggplot(global2,aes(x=winner,y=diff_yards))+geom_boxplot()
+median_test(global2,diff_yards,winner)
+```
+
+The Boxplot of the winners w.r.t to diff_yards has no outliers so normality doesn'fail. Further looking at the data we have unequal spreads of the whiskers of the two groups of teams. the median of a team that has a winning record is higher than a team with a losing record by a noticeable margain. We'll now conduct a t-test as normality holds in this case of the boxplots (no outliers). 
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with a higher difference of yards have noticeably had more wins as a result.
+
+Null Hypothesis/H_o: Difference between the means between teams with a winning or losing record for their difference of yards is 0 (subtraction of the two records).
+
+Alternative Hypothesis/H_a: difference between the means between a team with a winning or losing record for their difference of yards is < 0 (subtraction of the two records).
+
+Here for our t-test we get a p-value of 2.232x10^-8 < 0.05 which tells us that our means are different, now the way the test is done since we have positive and negative values for winners and losers we can't do the upper tail as the way R is doing the difference is False's yards - True's yards which is always negative and as a result our alternative of being greater than 0 is a p-value of 1 as our alternative can't exist. So as a result we've shown our alternative that the means differ (<0) meaning a higher difference of yards yeilds more wins. 
+
+If we wanted to further comment on we could do a sign test and show how many of our values for the winners is greater than median (all of the 13 above, none below it) and how many of the non-winners are above it (1 above, 14 below).
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the difference of yards, then there is an indication that there is an association between a teams record being a winning or losing one and the difference of yards.
+
+Null hypothesis/H_o2: there doesn't exist an association between difference of yards and a teams record being a winning or losing one.
+
+Alternative Hypothesis/H_a2: there does exist an association between difference of yards and a teams record being a winning or losing one.
+
+The P-value shows there is a difference of yards between teams that win >=8 wins (8.387813x10^-07 < 0.05) so we reject the null in no association between difference of yards and if the team has a winning record or not in favour of the alternative that says there does exist an association (two-sided or one-sided both show the same rejection of the null, one-sided is approporiate in this case as of the regression fit showing there is a relationship). We don't rely on this test as its not as reliable as the t-test and since the t-test holds its condition of normality to be true then we take those results. I've added to the argument that the mood test says the same thing the t-test and regression test both are trying to prove in the grand scheme of things.
+
+**Discussion: **In Football a team that tends to out throw and rush other teams gets closer and closer to the opponents end zone where they have the oppurtunity to score more points and as a result win (more) games. So the higher the the team has out gained thier opposing team in total yardage the more wins they have. One can argue that a team with high yardage doesn't always wins games which is true but in terms of the study and other analysis'(turnover differential for example), a team to ensure they have the best chance at winning games needs to have a positive difference of yards as high as can be (other factors can effect the outcome but not to the same extent as the difference of yards). This is discussed further into the analysis. 
+
+
+### Wins/Winner with respect to Rushing Yards
+
+```{r}
+ggplot(global2,aes(x=wins,y=rushing))+geom_point()+geom_smooth(se=F)
+fitted_line_rush = lm(rushing~wins,data = global2)
+summary(fitted_line_rush)
+rush_resid = ggplot(fitted_line_rush,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+rush_resid
+```
+
+The above is a regression test to see if a relationship between rushing yards by a team and its record, whether its winning one or not exists. The R-squared of 35% tells us that a relationship doesn't exist between the two. The P-value for the coefficent of wins in 0.000877 is somewhat significant (not strongly). The residual plot's curve is somewhat smooth with random points. There does exist points >500 on the .resid plot which suggest there is some skewness as the range for the axis for the other points falls betwen 500 and -500
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between rushing yards and wins does exist in which neither fit shows.
+
+```{r}
+ggplot(global2,aes(x=winner,y=rushing))+geom_boxplot()
+t.test(rushing~winner,data=global2)
+median_test(global2,rushing,winner)
+```
+
+If we further our anaylsis to view the boxplot we can see that outliers (winnning record plot) exist so a t-test to see if there's a difference in means cannot be justified. To note the boxplot's plot, neither records plot has equal spread and a team with a winning record has a higher median. I've gone to the liberaty to show the results but they play no factor in the analysis of if it in effecting a teams number of wins although showing what the mood test is showing it can't be relied upon (normality fails due to outlier). The t-tests null and alternate hypothesis are as such:
+
+Null Hypothesis/H_o:the mean difference between the rushing yards of a teams winning and losing record is equal to 0 (subtraction of the two records).
+
+ALternative Hypothesis/H_a:the mean difference between the rushing yards of a teams winning and losing record is not equal to 0 (subtraction of the two records).
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with higher rushing yards have noticeably had more wins as a result.
+
+with P-value 0.001943 < 0.05 rejects the null and leads to rushing yards being higher in teams with a winning record.
+
+A mood's test has been conducted as where normality fails for the t-test to hold true, the mood test doesn't hold that as a factor. Here we have P-value of 0.007989183 < 0.05 which tells us our 
+
+Null Hypothesis/H_o2: there is no association between rushing yards and if a team has a winning record.
+
+is rejected in favour of the
+
+Alternative Hypothesis/H_a2: there is an association between rushing yards and if a team has a winning record or not.
+
+Two-sided or one-sided there is an association, here the p-value is two-sided but if look at one-sided it still proves theres an association. The reason why a two-sided test is done is the regression fit for a parabloic or linear relationship doesn't exist and so if a one-sided test were conducted a team with less/more rushing yards than a losing records could be disregarded which can't be done unless a relationship does exist.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the rushing yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their rushing yards.
+
+**Discussion: **Although we don't have a relationship between rushing yards and a winning record we can say there is an association between the two which in terms of the context of Football is justifiable as from the difference of yards analysis a team that has a lot of yards tends to win more games. Now rushing yards the more they have contributes to this analysis as this is essentially a supplementary piece towards the difference of yards. We'll see more when looking at opponents rushing yards. 
+
+
+### Wins/Winner with respect to Opponents Rushing Yards
+```{r}
+ggplot(global2,aes(x=wins,y=opp.rushing))+geom_point()+geom_smooth(se=F)
+fitted_line_opp_rush = lm(opp.rushing~wins,data = global2)
+summary(fitted_line_opp_rush)
+opp_rush_resid = ggplot(fitted_line_opp_rush,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+opp_rush_resid
+```
+
+A linear relationship between number of wins and opponent rushing yards is done so by a Regression test. The R-squared of 54% is bad but enough to say there exists some sort of relationship between the two. The P-value of wins coefficent is strongly signifcant in 7.38e-06 (x10^-6 is what the e-06 means). The residual plot is to some extent smooth and random except for a few residuals near the middle. So we have a relationship between the two so lets go to a further extent:
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between opponents rushing yards and wins does exist in which one does exist and all that was needed was to show one.
+
+```{r}
+ggplot(global2,aes(x=winner,y=opp.rushing))+geom_boxplot()
+t.test(opp.rushing~winner,data=global2)
+median_test(global2,opp.rushing,winner)
+```
+
+Before we conduct a test we need to consider our boxplot. In the plot we have unequal spread for teams with a losing record as well as a pretty large range. For teams with a winning record we have a median less than that of the losing record teams, about equal spread, and outliers. 
+
+Here we can't go off the results of our t-test which assumes normality which doesn't hold by the outliers in the plot. The test is displayed with null hypothesis/H_o: difference between means of opponents rushing yards of both records is 0 (subtraction of the two records), and alternate hypothesis/H_a: difference between means of opponents rushing yards of both records is not 0 (subtraction of the two records). The null is rejected with P-value 2.218x10^-05 which does say there is a significant difference between losing a winning records with respect to thier opponents rushing yards but due to the outlier we need to test the median using our mood test to do so.
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with lower  opponents rushing yards have noticeably had more wins as a result.
+
+So now we test our median using our mood's test with null hypotheis/H_o2: no association between whether a team has a winning record and their opponents rushing yards and alternate hypothesis/H_a2: there is an assciation between oppoenets rushing yards and whether a team has a winning record. The P-value of 6.486972e-04(e-04 is x10^-4) < 0.05 rejects our null in favour of the alternate and looking closer at the 2x2 table we see uneven numbers for both True and False telling us there is an association between opponents passing yards and a teams record being a winning or losing one. To note, a two-sided test is done (doesn't matter which one is chosen both will reject the null) as the data has outliers and in football context a team doesn't need to be a great team in stopping their oppoenents form rushing the ball, so we can have the value being higher or lower which just need to see association to prove theres a relationship. As well because we do have somewhat of a relationship between the two from the regression fit we could do a one-sided test which gives us the same results but from the previously listed point we can't go off the assumption that all winning teams have less opponent rushing yards than a team with a losing record (boxplot shows some overlap, and R-squared isn't good enough to go off of).
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the opponents rushing yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their opponents rushing yards.
+
+**Discussion: **In context of Football, a team that can limit their opponents rushing yards means their defence against the run is one which allows them to outgain their opponents in total yards. Before, we discussed in our anaylsis of rushing yards that the more rushing yards a team has the more it contirbutes towards the difference of yards in the positive direction, which we concluded increases the number of wins a team has the higher that difference is. Here we see that the lower the opponents rushing yards is and the higher the teams rushing yards is, goes hand in hand in a teams winning record. The higher their rushing yards, the lower their opponents rushing yards tend to be which is what contributes to the difference of yards anaylsis as a more refined way of looking at it. The above anaylsis tells us that our opponents yards are lower for teams with a winning record and higher with teams with a losing record (further makes our claim). The analysis of difference of rushing yards furthers this claim (and looks at half of the difference of yards analysis in detail).
+
+### Wins/Winner with respect to Difference of Rushing Yards
+
+```{r}
+ggplot(global2,aes(x=wins,y=rush_diff))+geom_point()+geom_smooth(se=F)
+fitted_line_rush_diff = lm(rush_diff~wins,data = global2)
+summary(fitted_line_rush_diff)
+rush_diff_resid =ggplot(fitted_line_rush_diff,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+rush_diff_resid
+```
+
+To see if theres a relationship between rushing yards and an opponents rushing yards (rushing-opp.rushing) with respect to wins we need to conduct a regression test. The R-squared of 53% is bad but enough to say one does exist between the two. The P-value of 1.09x10^-5 is strongly significant. As well the curve is smooth for the residual plot with random points, noting there does exist a high point above zero (.resid axis) over 1000 but other than that we're able to see a relationship exists between the two. To further our claim we'll conduct the appropriate test once we've looked at our boxplot.
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between the difference of rushing yards and wins does exist in which one does.
+
+```{r}
+ggplot(global2,aes(x=winner,y=rush_diff))+geom_boxplot()
+t.test(rush_diff~winner,data=global2, alternative="less")
+median_test(global2,rush_diff,winner)
+```
+
+The Boxplot is drawn with the rushing difference as the y-axis and the if the team has a winning record on the x-axis. Teams with a losing record's boxplot doesn't have an equal spread, has no outliers, its range is greater than that of a winning ones and has a lower median than its winning records plot as well. The winning records plot has an outlier, a lower range than the losing records plot, and unequal spread. 
+
+Looking at our boxplot, we can't conduct a t-test as normality fails here and the whole entireity of a t-test assumes normaility does hold. Instead of testing our mean of differences, we'll test our median of the two records with a mood test.
+
+null hypothesis/H_0: There does not exist an association between a teams difference of rushing yards and if they have a winning record.
+
+alternative hypothesis/H_a: There does exist an association between a teams difference of rushing yards and if they have a winning record.
+
+Our P-value of 6.486972x10^-4 < 0.05 tells us to reject our null in favour of the alternate telling us there does exist an association between a teams difference of rushing yards and if they have a winning record. Two-sided or one-sided, either of the two will reject the null (half the above P-value to get on-sided its still less than 0.05) even though it calls for us to do a one-sided test as there is a relationship through the regression fit done above.
+
+I've included the results of the t-test with (null and alternate are different from mood tests) null being the difference between the two means of difference of rushing yards between the two records is 0 (subtraction of the two records) and alternate being the two means of difference of rushing yards between the two records is less than 0 (subtraction of the two records). Although it does show what we're trying to show, it can't be used or relied upon due to the outlier. To note, the alternative is less (one-sided) as we've shown through the regression fit that a relationship does exist in a winning record team has a higher difference of yards than a team with a losing record. The less than 0 is to show a losing record does have a mean difference of rushing yards less than a team with a winning record.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the difference of rushing yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their difference of rushing yards.
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with a higher difference of rushing yards have noticeably had more wins as a result.
+
+**Discussion: **In terms of football, our claim in opponents rushing yards and rushing yards is proven. Meaning, if a team with a winning record has higher rushing yards, then their opponents have lower rushing yards and as a result they win more games (rushing, opponent rushing and difference of yards analysis all used here).
+
+### Wins/Winner with respect to Passing Yards
+```{r}
+ggplot(global2,aes(x=wins,y=passing))+geom_point()+geom_smooth(se=F)
+fitted_line_pass = lm(passing~wins,data = global2)
+summary(fitted_line_pass)
+pass_resid = ggplot(fitted_line_pass,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+pass_resid
+```
+
+A linear relationship between number of wins and passing yards is done so by a Regression test. The R-squared of of 23% says one doesn't exist. Noting the residual plot, the points seem to be random along the line of 0, but there are some high values throughout further away from 0 on the .resid axis. As well the coefficent of wins P-value is 0.00927 which is somewhat significant (not strongly).
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between passing yards and wins does exist in which neither fit shows.
+
+```{r}
+ggplot(global2,aes(x=winner,y=passing))+geom_boxplot()
+t.test(passing~winner,data=global2)
+median_test(global2,passing,winner)
+```
+
+If we further look at the boxplot we see that both records winning and losing don't have equal spreads, winning record teams have a big range and there seems to be variability between the two records (no outliers exist). Now conducting a t-test with a 
+
+Null Hypothesis/H_o: the difference of mean differences between passing yards for a winning record and a losing record team is 0 (subtraction of the two records).
+
+Alternative Hypothesis/H_a: the mean difference between passing yards for a team with a winning record and losing record isn't equal to 0 (subtraction of the two records).
+
+Our p-value of 0.04778 < 0.05 rejects our null in the difference of mean passing yards between records to be zero in favour of the alternate that it isn't equal to zero. We're doing a two-sided t-test as in a Football context a winning team could have low passing yards and high rushing yards and as a result win games that way. As well since there isn't a relationship between the two variables from the regression fit done above, it can't be justified to do a one-sided test when variability between the two exist and there isn't a linear/parabolic relationship between the two. 
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with higher passing yards have noticeably had more wins as a result.
+
+I've added a mood's test to show that the test accepts (0.05813721 < 0.05) a null of no association between record and passing yards (alternate is there is one) and we take the t-test as our analysis as it's more accurate than the mood's test and we are able to use it as normality holds.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the passing yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their passing yards.
+
+**Discussion: **So we don't have a relationship between wins and passing yards. Like the previous analysis of rushing but now in terms of the t-test this is a supplementary anaylsis done in terms of the difference of yards analysis. So winning teams do have more passing yards than those who aren't which adds to the total yards they gain. We'll later discus this when looking at the opponents passing yards.
+
+### Wins/Winner with respect to Opponents Passing Yards
+
+```{r}
+ggplot(global2,aes(x=wins,y=opp.passing))+geom_point()+geom_smooth(se=F)
+fitted_line_oppass = lm(opp.passing~wins,data = global2)
+summary(fitted_line_oppass)
+oppass_resid = ggplot(fitted_line_oppass,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+oppass_resid
+```
+
+We need to first see if a relationship exists (linear) between the number of wins a team has and their opponents passing yards. The R-squared given of around 9% tells us that there doesn't seem to be a relationship between the two. The residual plot was drawn for the regression and the curve is somewhat smooth with the residuals scattered randomly, with a some points above 500 on the .resid axis in which most of the points fall between 500 and -500. As well the coefficient for wins isn't strongly signifcant in 0.1161.
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between opponents passing yards and wins does exist in which one doesn't.
+```{r}
+ggplot(global2,aes(x=winner,y=opp.passing))+geom_boxplot()
+t.test(opp.passing~winner,data=global2)
+median_test(global2,opp.passing,winner)
+```
+
+If we further our analysis, we'll look at the boxplots before we conduct our test to see any form of relation. given the two boxplots we see teams with a losing record have a higher median than those of a winning record as well uneven spread and a large range. Looking at the winning record plot we see that the plot has even spread, and a range not worth noting is too small or big. The plot has has no outlier(s) so we conduct a t-test (normality passes here) on our mean rather than one on the median using a mood's test (results for mood test are given but aren't as reliable as the t-test). 
+
+Null Hypothesis/H_o: the difference of mean opponent passing yards between a winning a losing record team is equal to zero (subtraction of the two records).
+
+is rejected in favour of the
+
+Alternative Hypothesis/H_a: the mean difference of opponents passing yards between a team with a winning and losing record is not equal to zero (subtraction of the two records).
+
+The P-value of 0.03413 < 0.05 rejects the null in favour of the alternate. A two-sided test was chosen for the t-test as there seemes to be variability between the boxplots of records and in context towards football and the difference of yards analysis we could have a team that has their opponent out throw them for yards, in which the team would out rush the opponents team yards still having a positive difference of yards or they could throw for a lot of yards but the team still manages to have more passing yards. As well, since we don't have a relationship from the regression fitting above, assuming a one-sided test (although gives the same rejection of the null) disregards the previous facts given and can't be assumed, as again there is some overlapping between the two records and we're to assume what we don't know (disregarding a sense of football knowledge). 
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with lower opponents passing yards have noticeably had more wins as a result.
+
+I've included the results of the mood's test, null: no assoication between record and opponents passing yards, and alternate: association exists between record and opponent passing yards. The two-sided test (same reasoning as why we'd choose two-sided in t-test) doesn't reject the null (P-value: 0.05813721 < 0.05) where as the one-sided does. Note this is just a comment of the mood test and how we are not using this test when normality doesn't fail and how the t-test is more reliable.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the opponents passing yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their opponents passing yards.
+
+**Discussion: **In terms of Football we see that the lower the opponent gains in yards (in this case passing), the better they have a chance in winning. There does seem to have some sort of relationship that a team with a winning record tends to have high passing yards, and lower opponent passing yards. This will be further looked upon in the difference of passing yards analysis.
+
+### Wins/Winner with respect to Difference of Passing Yards
+
+```{r}
+ggplot(global2,aes(x=wins,y=pass_diff))+geom_point()+geom_smooth(se=F)
+fitted_line_pass_diff = lm(pass_diff~wins,data = global2)
+summary(fitted_line_pass_diff)
+pass_diff_resid =ggplot(fitted_line_pass_diff,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+pass_diff_resid
+```
+
+From the previous anyalsis of passing and opponents passing yards (the subtraction of them in the order listed) here we're testing if they share a linear relationship with respect to whether a team has a winning record or not. The R-squared of 37% tells us that the two don't share a relationship between the two. Looking further at the coefficient P-value of 0.000558 for wins is somewhat signifcant and so we'll further look at different tests to see if a high/low enough difference of passing yards does effect the number of wins a team wins. To note the residual plot is pretty random and somewhat smooth. There also seems to be a high value near .fitted=400 that needs to be accounted for.
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between difference of passing yards and wins does exist in which one doesn't.
+
+```{r}
+ggplot(global2,aes(x=winner,y=pass_diff))+geom_boxplot()
+t.test(pass_diff~winner,data=global2)
+median_test(global2,pass_diff,winner)
+```
+
+Before we conduct a reasonable test, we need to see how our boxplots look for a team with a winning record and losing record. The losing record plot has equal spread, a somewhat large range, no outliers and a median less than the winning records one. The winning record plot has equal spread, no outliers and a smaller range than the losing records plot. 
+
+So from our plot we can justify using a t-test as normality holds here. The null (hypothesis/H_o) for our t-test is our difference in mean difference of passing yards between losing records and winning records is 0 (subtraction of the two records). The alternative (hypothesis/H_a) being our difference in mean difference of passing yards between losing records and winning records is not equal to 0 (subtraction of the two records). Here with a P-value of 0.001796 < 0.05 we reject the null in favour of the alternate hypothesis that the difference is not 0. I've also included a mood test although we don't need to include it as our t-test is more reliable, its null that there is no association between difference of passing yards and if a team has winning record or not is rejected in favour of the alternate in there is an association between the difference of passing yards and if a team has a winning record. Both tests are two-sided as the regression fit done above gives no indication that says it can be assumed that a team with a higher difference of passing yards has more wins. Since we've shown the mean difference of passing yards are not the same we've shown essentially based off of the boxplot that teams with a more wins (winning record) have a positive and naturaly greater difference of passing yards than a team with less wins (losing record).
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the difference of passing yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their difference of passing yards.
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with a higher difference passing yards have noticeably had more wins as a result.
+
+**Discussion: **In terms of football this backs up our claim in opponents passing yards that the higher the teams passing yards, the lower the opponents passing yards tend to be and as a result the more wins they have (passing,opponents, and difference of yards anaylsis back this claim) as their total yardage for the passing half is positive (outgaining their opponents in yards).
+
+
+### Wins/Winner with respect to Field Goal Percentage
+
+
+```{r}
+ggplot(global2,aes(x=wins,y=FG))+geom_point()
+fitted_line_FG = lm(FG~wins,data = global2)
+summary(fitted_line_FG)
+FG_res = ggplot(fitted_line_FG,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+FG_res
+```
+
+Our regression to see if a relationship between the number of wins and field goal percetage has a R-squared of 6% approximately. This tells us that there isn't a relationship between the number of wins and field goal percentage. The cofficient of wins isn't strongly significant (0.184). The resiudal plot has a some smoothness to the curve, as well as the points are random and finally there exists a large point on the plot above 20 in the residual axis.
+
+To note, we could fit the regression to become a curve and we'd get a slightly higher or similar to R-squared, for this reason I havent included the results as it doesn't change there is no relationship (all we're trying to show) between the two and the two tests conducted below further prove so.
+
+```{r}
+ggplot(global2,aes(x=winner,y=FG))+geom_boxplot()
+ggplot(global2,aes(x=wins,y=FG))+geom_point()
+t.test(FG~winner,data=global2)
+median_test(global2,FG,winner)
+```
+
+If we further go to the extent to see the boxplot we see that there is indeed a difference of the medians. The two records (winning and losing) both have about equal spread, no outliers and a pretty large range that overlaps the two. Also the overlap results in variability between the two records (something to note).
+
+Since normality holds to be true we can use a t-test for our analysis.
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with a higher field goal percentage have noticeably had more wins as a result.
+
+Null Hypothesis/H_o: the mean difference between the field goal percentage of a teams winning and losing record is equal to 0 (subtraction of the two records).
+
+ALternative Hypothesis/H_a: the mean difference between the field goal percentage of a teams winning and losing record is not equal to 0 (subtraction of the two records).
+
+A two-sided t-test is used as we didn't have a relationship between the two variables in the regression anaylsis above and as such we can't justify that a team with a winning record will have a winning record because they have a lower or higher percentage than the losing record teams (football context we can't say its a determining factor). The P-value of 0.1676 > 0.05 doesn't reject the null hypothesis and so even though its clear from the means given for the two in the test output that the means do differ, the variability that exists between the two suggest that it's not a defining variable high or low that goes hand in hand if a teams wins are high or low (just a commonality that a team with a winning record has a higher percentage).
+
+I've included the mood's test on the median. Although we don't need the results, they're included to show there is no association between the two for similar reasons the t-test said the means are equal to zero.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of field goal percentage, then there is an indication that there is an association between a teams record being a winning or losing one and the field goal percentage they have.
+
+Null Hypothesis/H_o2: there doesn't exist any association between a teams field goal percentage and if a team has a winning or losing record.
+
+Alternative Hypothesis/H_a2: there does exist an association between a teams field goal percentage and if a team has a winning or losing record.
+
+The P-value of 0.1676 > 0.05 doesn't reject the null that says there is no associaiton between the two variables (two-sided or one-sided, we still have the P-value > 0.05).
+
+**Discussion: **To explain this looking more specifically at the boxplots we can see that variability between the two variables exist which is shown as we have some overlap between winners and non winners causing for there to be no relationship, difference in mean or association (w.r.t to using the median). This is acceptable as a winning team could simply never have to kick a field goal if they're scoring when they're close to scoring postion (6 points as well as 2 point conversion as oppose to a field goal worth 3 or the extra point field goal after a touchdown). If a team has a good defence and offense and they gain a good difference of yards then a good kicker with a good field goal percentage isn't a game changer for the team which the above analysis backs and also the several analysis' of yardage show. High or low, field goal percentage plays no factor on the number of wins a team has and if the team holds a winning record or not (just common that teams with a winning record have a higher percentage).  
+
+
+
+### Wins/Winner with respect to Penalties
+```{r}
+ggplot(global2,aes(x=wins,y=penalties))+geom_point()+geom_smooth(se=F)
+
+fitted_line_penal = lm(penalties~wins,data = global2)
+summary(fitted_line_penal)
+penal_resid = ggplot(fitted_line_penal,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+penal_resid
+```
+
+Here we're seeing if the number of wins correspondes to the the penalty yards a team accumaltes throughout the regular season. The R-squared is 5% and so there doesn't exist a relationship between the variables. The cofficent for wins being 0.252 is not strongly significant. As well for the residual plot the points are random, the curve is to some extent smooth and we have max residual points greater and less than 200 and -200 respectively.
+
+*It can be noted that fitting the regression with a curve (I(wins^2)) will give a slightly higher if not the same R-squared and a similar non-significant P-value for the coefficent of wins. The purpose of regression here is to find some form of relationship which whether we use a line or curve to fit won't make a difference as one doesn't exist (R-squared for line fit is very low).
+
+```{r}
+ggplot(global2,aes(x=winner,y=penalties))+geom_boxplot()
+t.test(penalties~winner,data=global2)
+median_test(global2,penalties,winner)
+```
+
+In the box plot the spreads and range overlap to some extent (both seem to have about equal spreads). For teams that don't have a winning record there does exist an outlier so our t-test fails and so a mood test is conducted. 
+
+Null Hypothesis/H_o: there doesn't exist any association between if a team has a winning record and the accumalted penalty yards gained.
+
+Alternative Hypothesis/H_a: there does exist an association between the teams winning/losing record and the penalty yards accumalted. 
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the penalty yards (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their penalty yards.
+
+The P-value of 0.7047381 > 0.05 favours the null hypothesis in we don't reject it. A two-sided test is used as since a regression line/curve can't be fitted with the data set indicating no relationship between the two (penalty yards and wins), it can't be justified to do a a one-sided test as penalty yards could be higher or lower in teams with a winning record and that couldn't be known.
+
+t-test:
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with higher penalty yards have noticeably had more wins as a result.
+
+Null Hypothesis/H_o2: the mean difference between the penalty yards of a teams winning and losing record is equal to 0 (subtraction of the two records).
+
+ALternative Hypothesis/H_a2:the mean difference between the penalty yards of a teams winning and losing record is not equal to 0 (subtraction of the two records).
+
+The t-test results and hypothesis' have been included as even though it says there isn't a noticeable difference (0.1466 > 0.05) between the two's means, although tempting to use this to prove the analysis, normality doesn't hold and as such this test is unreliable. *Two-sided test for similar reasoning for why mood test was two-sided listed above.
+
+**Discussion: **In context towards why penalty yards don't play a factor towards wins, teams that have a lot of penalty yards against them could have the penaltyy occur at different positions on the pitch and so yes the team their defending moves up 10-20 yards or gets a reset towards the number of downs (four attempts to move 10 yards from marked location on pitch) but if thats occuring in the opponents side of their field (before the 50 yard line) then their still not close to the end zone and scoring position. As well, both teams commit a penalty at some point during the game so if one team gains 10 yards, the opposition could see themselves in the same position later in the game. The above tests supports the claim made in the last few sentences and further indicates that teams with a winning record has more penalty yards but higher or lower doesn't result in more wins (not as an alone variable).
+
+
+###Wins/Winner with respect to Percent of Rushing
+
+```{r}
+ggplot(global2,aes(x=wins,y=pct.rushing))+geom_point()+geom_smooth(se=F)
+
+fitted_line_pctrush = lm(pct.rushing~wins,data = global2)
+summary(fitted_line_pctrush)
+pct_rush_resid = ggplot(fitted_line_pctrush,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+pct_rush_resid
+```
+
+To see if there exists a relationship between the number of wins and how teams with more wins have a higher/lower/same percent of rushing the ball than teams that dont, we use regression to do so. Looking at the R-squared we have a value of 0.2974 which comes to 29.74% which isn't a high enough value to consider there does exist a relationship between the number of wins and the percentage of plays the team rushs for. The P-value for the coefficent for wins is 0.00269 which is not strongyl significant. Looking at the residual plot we have a smooth curve, there does exists some skewness in the data as there is a residual less than -10 while other points which look random fall within 10 and -10 as the range of the .resid plot.   
+
+*The data could have been fitted with a curve which would give a slightly higher if not the same R-squared and slightly lower or same non-significant P-value for the coefficent for wins. The purpose of the regression fit is to view if a relationship between percentage of rushing and wins does exist in which neither fit shows.
+
+```{r}
+ggplot(global2,aes(x=winner,y=pct.rushing))+geom_boxplot()
+median_test(global2,pct.rushing,winner)
+t.test(pct.rushing~winner,data=global2)
+```
+
+If we further see if there's at least some sort of association between the two and see if the differences are zero or not we'll conduct a mood test (need be) and a t-test respectively. If we look at the boxplots, teams with a losing record has equal spread where team with a winning record doesn't, winning record teams have a long third quantile range (Q_0.5 to Q_0.75), and the two possess vraibility as they have some overlap between the two. There also exists an outlier for teams with a losing record. So our t-test conducted fails as normality in the data doesn't hold (mood test doesn't rely on this factor).
+
+I've included the t-test results to show how the outliers make the t-test reject a null hypothesis (0.006497 < 0.05) that the difference between the two records (winning/losing) mean percentage of rushing the ball is not equal to zero (subtraction of the two records) for the alternative that the mean difference in percentage of rushing the ball for winning and losing record teams is not equal to 0 (subtraction of the two records). Although tempting to show that a team with more wins has a higher percentage of rushing the ball which is shown in the boxplot, the t-test isn't to be used as the mood test says otherwise and in this case doesn't fail if normality fails. Note, a t-test is conducted to measure that the difference in means is large enough to say that teams with higher percentage of rushing the ball have noticeably had more wins as a result. Two-sided test for the same reason mood test is two-sided explained further down the page. 
+
+The mood test however with a P-value of 0.05813721 > 0.05 tells us our 
+
+Null Hypotheis/H_o2: there is no association between a teams record and their percentage of rushing the ball during the course of a game.
+
+holds as oppose to the
+
+Alternative Hypothesis/H_a2: there is an association between if a team has a winning record or not and the percentage the team rushs the ball.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the percentage of rushing the ball (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their percentage of rushing the ball.
+
+The P-value is two-sided as from the regression fit done above, a relationship between the two, percentage of rushing the ball and if a team holds a winning record or not doesn't exist. For this reason a one-sided test can't be justified as a team with a winning record could have a high or low percentage of rushing the ball compared to a team with a losing record and there's no indication of such.
+
+**Discussion: **In context towards the game of Football, the percentage of a team rushing the ball really plays no factor in how a team wins games. A team with a horrible run game could rush the ball more than they pass and gain little yardage as oppose to the lower percentage of passing plays where those passing plays could accumalte them more yardage. We could look at if a team with a higher percentage of rushing the ball has a lot of rushing yards but the previous analysis of difference of yards answers that as long as a team outgains the opponents team in yardage in a game then the percentage of running and passing plays won't matter (explained further down the report in pass/rushing yards, opponent rushing/passing yards and difference of passing/rushign yards). The boxplot shows winning record teams have a higher percentage but from the following tests they don't play a factor in a teams number of wins high or low. 
+
+
+### Wins/Winner with respect to Turnovers
+```{r}
+ggplot(global2,aes(x=wins,y=turnovers))+geom_point()+geom_smooth(se=F)
+fitted_line_turn = lm(turnovers~wins,data = global2)
+summary(fitted_line_turn)
+turn_resid = ggplot(fitted_line_turn,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+turn_resid
+```
+
+The relationship between a teams number of wins and their turnovers is looked upon using a scatter plot points, a fitted line to test if there exists a relationship between the two and a residual plot to further comment on the regression testing. The R-squared of 26% tells us there doesn't exist a a relationship between turnovers a teams record. The P-value backs this claim as 0.00522 is somewhat (not strongly) signifcant. The residual plot isn't smooth and contains high values above 10 where the same can't be said for below -10 (range of values for .resid axis falls between 10 and -10) and so some skewness looks to be in order.  
+
+```{r}
+ggplot(global2,aes(x=winner,y=turnovers))+geom_boxplot()
+t.test(turnovers~winner,data=global2)
+median_test(global2,turnovers,winner)
+```
+
+Before we conduct a test for the data we look at the boxplot of both records, winning and losing to see whether to test the median or mean. The losing teams record has equal spread, no outliers, a lower median than the winning records plot, and a somewhat big range (range is bigger than the winning record teams, size of the box). The winning records plot has equal spread and no outliers. So from the boxplot we conduct a t-test 
+
+with null hypothesis/H_o: the difference between the records (winning and losing) mean turnovers is equal to 0 (subtraction of the two records).
+
+with alternative hypothesis/H_a: the difference between records (winning and losing) mean turnovers is not equal to 0 (subtraction of the two records). 
+
+Here we have a P-value 0.06659 >0.05 which doesn't reject the null. I've included the test of their medians using the mood's test for supplmentary info, here the null hypothesis (H_o2) for the test is theres no association between if a team has a winning record and their turnovers, and the alternative hypothesis (H_a2) that there is an association between a teams winning record and their turnovers. We don't look at this test as if we are able to use a t-test, we conduct that test over this one as it's more reliable but if we further look into the mood test we see it still tells us that the variables aren't associated (doesn't reject the null) with the P-value 0.05813721 > 0.05 telling us as such. To note, the boxplots do show that our medians are different (even mean when the t-test produces the means for both) but this occurs as the two records have variability between the two, meaning they have overlapping ranges and whiskers in their plots. As well a two-sided test was done for both tests as from the regression fit we don't have a relationship between turnovers and wins so we can't justify looking at one-side of the test when we can't be certain that a team with a winning record has a higher/lower turnovers ratio than their opponents.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the turnovers (how many greater/less than median), then there is an indication that there is an association between a teams record being a winning or losing one and their turnover differential.
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with a higher turnover differential  have noticeably had more wins as a result.
+
+**Discussion: **In regards to football, turnovers whether high or low play no factor on if a team has a winning record or not. Yes teams with a winning record do have a higher turnover number (number is in the postives rather than neagtives for losing record teams) but beacause there isn't a relationship, association or a difference to justify it from the test conducted in the analysis, its safe to say a teams turnovers doesn't effect the outcome on how they win their games (it helps but isn't to the extent shown in the difference of yards). To add, it does help a team to obviously not turn over the ball and make sure they make their opponents do more often than them, but for football unless a team capitilizes on this (difference of yards analysis comes into play) the turnovers will mean nothing if they don't gain yardage and prevent less from their opponents (essentially helps a winning record team back on the field to gain more yardage as oppose to their opponents gaining them).
+
+
+### Wins/Winner with respect to Punting
+
+```{r}
+ggplot(global2,aes(x=wins,y=punting))+geom_point()+geom_smooth(se=F)
+fitted_line_punt = lm(punting~wins,data = global2)
+summary(fitted_line_punt)
+resid_punt = ggplot(fitted_line_punt,aes(x=.fitted,y=.resid))+geom_point()+geom_smooth(se=F)
+resid_punt
+```
+
+There doesn't seem to be any form of relationship between punting and number of wins. The R-squared is even lower in 0.6% which further proves there is indeed no relationship. As well the coefficient of wins is 0.683 which isn't strongly significant. The resiudal plot curve isn't the smoothest as well high values after 3 and -3 on the .resid axis and the points are random.
+
+To note, a curve to fit the regression would give a slightly higher or about the same R-squared and again not a strongy significant coefficent for wins and for the sake of the analysis hasn't been included as we're looking for a direct (linear) relationship between punting average per yards and number of wins
+
+
+```{r}
+ggplot(global2,aes(x=winner,y=punting))+geom_boxplot()
+t.test(punting~winner,data=global2)
+median_test(global2,punting,winner)
+```
+
+The medians of teams with a winning and losing record are almost the same with the same range and spread which says punting plays no role in the number of wins a team whether a team has a high or low punting average. The P-values for our mood test and t-test
+
+* Both tests are two-sided as since we don't have a relationship between the two (regression fit done above), it can't be justified that we know a team with a winning record has a higher or lower average punting yards per punt.
+
+t-test:
+
+Null Hypothesis/H_o:the mean difference between the average punting yards of a teams winning and losing record is equal to 0 (subtraction of the two records).
+
+ALternative Hypothesis/H_a:the mean difference between the average punting yards of a teams winning and losing record is not equal to 0 (subtraction of the two records).
+
+*A t-test is conducted to measure that the difference in means is large enough to say that teams with a higher punting average per punt have noticeably had more wins as a result.
+
+Mood Test:
+
+Null Hypothesis/H_o2:there doesn't exist an association between average punting yards and a teams record being a winning or losing one.
+
+ALternative Hypothesis/H_a2:there does exist an association between average punting yards and a teams record being a winning or losing one.
+
+*The sign test here is done here to show if the values for each record are greater than or less than the median of the punting average per punt, then there is an indication that there is an association between a teams record being a winning or losing one and their punting averag per punt.
+
+
+In both tests our null hypothesis (H_o) isn't reject with t-test P-value 0.7484 > 0.05 and mood test P-value 0.7047381 > 0.05 (two-sided or one-sided the value is still > 0.05, as well due to the regression fit we can't assume without some sort of relationship that one record will have a higher or lower punting average). So like the boxplot shows no difference in median and the t-test listed means are almost identical (very close), our mood and t-test show there's no association between average punting yards and not a noticeable difference between the two records average punting yards a game to say a team with a winning record has a higher or lower average than a losing records team in which explains why a winning record has more wins. I've included the mood test although not needed as our t-test passes with normality existing in the subset of the data, as it does further help our claim (more of a supplementary test to further the claim being made) but isn't as reliable as the t-test and as such we shouldn't entirely base our anaylsis on it (only when normality fails).
+
+**Discussion: **In context towards Football, the farther a team punts from their current position on the field the further they make their opponent from their endzone and scoring position. This is contingent on opponents passing/rushing yards being lower than the opponents (yardage analysis done earlier in the analysis). That contingency is why this variable plays no factor in if they have a higher or lower punting yards average. Factor in the two tests show there's no difference between the two and we see that high or low average punting yards has no say on if a team wins each game or not. It is another facet of playing the game that contributes to winning but unlike the field goal percentage,percentage of running the ball, turnover differential and penalty yards analysis, winning and losing record teams have almost the exact same median/mean that it plays no factor high or low on wins being high or low.
+
+## Conclusion
+
+We've looked at several variables regarding a teams number of wins and if the team has a winning record or not. The determining factors here is the higher a teams rushing and passing yards are, the lower their opponents rushing and passing yards tend to be and as result the higher the passing and rushing yards difference becomes and all together the difference of yards becomes higher. With the other variables: turnovers, percent of rushing, field goal percentage, and punting penalty yards, yes the teams with winning records do have higher values (mean/median) but because of their limiting influence of the football game (derived from the tests in the analysis) we can say that teams with higher yardage and wins do tend to have higher values in those other categories of team stats but don't determine the main anaylsis of the outcome of the game being a win. Lastly we also have one variable that plays no factor in if a team has a winning record or not in punting. Neither winning or losing record teams showed to be higher or lower in this statistic and as such has no effect on the outcome of the game.
+
+##Works Cited
+
+Butler, Ken. "STAC32 - Applications of Statistical Methods." STAC32 - Applications of Statistical Methods, University of Toronto Scarborough: Ken Butler, 20 Nov. 2017, www.utsc.utoronto.ca/~butler/c32/notes/slides.pdf.
+
+*Above citation is knowledge learnt through the lecture slides throughout the course of the semester (fall 2017)
+
+*Knowledge of football is through personal knowledge of watching and following the sport.
